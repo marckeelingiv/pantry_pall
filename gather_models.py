@@ -1,6 +1,10 @@
 import os
 
 def gather_models(django_project_path, output_file_path):
+    '''
+    Gather all models.py content from the Django project directory
+    and write it to an output file for consumption by chatgpt.
+    '''
     models_content = []
 
     # Traverse the Django project directory
