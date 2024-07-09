@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Local
     "accounts.apps.AccountsConfig",
     "tags.apps.TagsConfig",
+    "recipes.apps.RecipesConfig",
 ]
 
 MIDDLEWARE = [
