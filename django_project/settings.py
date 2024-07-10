@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "tags.apps.TagsConfig",
     "recipes.apps.RecipesConfig",
     "cookbooks.apps.CookbooksConfig",
+    "ingredients.apps.IngredientsConfig",
 ]
 
 MIDDLEWARE = [
