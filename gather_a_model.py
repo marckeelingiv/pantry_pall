@@ -13,7 +13,7 @@ def copy_django_files_to_txt(app_folder):
     str: The path to the created .txt file or an error message if unsuccessful.
     """
     # Define the files to be copied
-    files_to_copy = ['admin.py', 'models.py', 'serializers.py', 'tests.py', 'urls.py', 'views.py']
+    files_to_copy = ['admin.py', 'models.py', 'permissions.py', 'serializers.py', 'tests.py', 'urls.py', 'views.py']
     folder_name = os.path.basename(os.path.normpath(app_folder))  # Extract the folder name
     output_file_name = f"{folder_name}.txt"  # Use the folder name to create the output file name
     output_path = os.path.join(app_folder, output_file_name)
