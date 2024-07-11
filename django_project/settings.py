@@ -37,14 +37,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     # Local
-    "accounts.apps.AccountsConfig",
-    "tags.apps.TagsConfig",
-    "cookbooks.apps.CookbooksConfig",
-    "ingredients.apps.IngredientsConfig",
-    "measurementunits.apps.MeasurementunitsConfig",
-    "recipes.apps.RecipesConfig",
-    "recipestoingredients.apps.RecipestoingredientsConfig",
+    'accounts.apps.AccountsConfig',
+    'tags.apps.TagsConfig',
+    'cookbooks.apps.CookbooksConfig',
+    'ingredients.apps.IngredientsConfig',
+    'measurementunits.apps.MeasurementunitsConfig',
+    'recipes.apps.RecipesConfig',
+    'recipestoingredients.apps.RecipestoingredientsConfig',
+    # Third-party
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'dj_rest_auth',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -80,6 +91,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_proessors.request',
             ],
         },
     },
@@ -140,4 +152,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = "accounts.CustomUser" 
+AUTH_USER_MODEL = 'accounts.CustomUser' 
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+SITE_ID = 1
