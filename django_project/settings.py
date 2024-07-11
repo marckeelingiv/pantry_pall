@@ -40,9 +40,11 @@ INSTALLED_APPS = [
     # Local
     "accounts.apps.AccountsConfig",
     "tags.apps.TagsConfig",
-    "recipes.apps.RecipesConfig",
     "cookbooks.apps.CookbooksConfig",
     "ingredients.apps.IngredientsConfig",
+    "measurementunits.apps.MeasurementunitsConfig",
+    "recipes.apps.RecipesConfig",
+    "recipestoingredients.apps.RecipestoingredientsConfig",
 ]
 
 MIDDLEWARE = [
