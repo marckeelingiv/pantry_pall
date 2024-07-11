@@ -16,5 +16,9 @@ class Recipe(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Author")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
 
+    class Meta:
+        verbose_name_plural = "Recipes"
+        ordering = ['-created_at']
+
     def __str__(self):
         return self.name
