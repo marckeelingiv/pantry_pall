@@ -23,9 +23,10 @@ urlpatterns = [
     path('api/v1/cookbooks/', include('cookbooks.urls')),
     path('api/v1/tags/', include('tags.urls')),
     path('api/v1/ingredients/', include('ingredients.urls')),
-    path("api/v1/api-auth/", include("rest_framework.urls")),
-    path('api/v1/dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('api/v1/dj-rest-auth/registration/',
-         include('dj_rest_auth.registration.urls')),
+    path("api/v1/accounts/", include("accounts.urls")),
+    # path("api/v1/api-auth/", include("rest_framework.urls")),
+    # path('api/v1/dj-rest-auth/', include('dj_rest_auth.urls')),
+    # path('api/v1/dj-rest-auth/registration/',
+    #      include('dj_rest_auth.registration.urls')),
     
 ]
