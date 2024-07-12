@@ -160,7 +160,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 SITE_ID = 1
-FRONT_END="https://youromain.com/"
+FRONT_END="http://127.0.0.1:8000/"
 
 
 SIMPLE_JWT = {

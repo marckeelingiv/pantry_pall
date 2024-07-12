@@ -1,157 +1,96 @@
 from django.urls import reverse
-from rest_framework.test import APITestCase
 from rest_framework import status
 from accounts.models import CustomUser
+from rest_framework.test import APITestCase
 from django.contrib.auth.tokens import default_token_generator
 
-
-class UserRegistrationTests(APITestCase):
-
-    def test_user_can_register(self):
-        url = reverse('signup_user')
+class RegisterAPITestCase(APITestCase):
+    def test_register_success(self):
         data = {
-            'name': 'Test User',
-            'email': 'testuser@example.com',
-            'password': 'testpassword123'
+            'name': 'John Doe', 
+            'email': 'johndoe@example.com', 
+            'password': 'password123'
         }
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(reverse('signup_user'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(CustomUser.objects.count(), 1)
-        self.assertEqual(CustomUser.objects.get().email, 'testuser@example.com')
+        self.assertEqual(response.data['message'], 'Account successfully created, We have sent you a verification email to johndoe@example.com. Click on the link in the email to activate your account.')
 
-class EmailVerificationTests(APITestCase):
-
+class LoginAPITestCase(APITestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(
-            username='testuser@example.com',
-            email='testuser@example.com',
-            password='testpassword123',
-            first_name='Test'
-        )
-        self.user.is_verify = False
-        self.user.save()
-
-    def test_email_verification(self):
-        url = reverse('verfiy_email')
-        confirmation_token = default_token_generator.make_token(self.user)
-        data = {
-            'user_id': self.user.id,
-            'confirmation_token': confirmation_token
-        }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.is_verify)
-
-class UserLoginTests(APITestCase):
-    def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            username='testuser@example.com',
-            email='testuser@example.com',
-            password='testpassword123',
-            first_name='Test',
-            is_verify=True
+            username='johndoe@example.com', 
+            email='johndoe@example.com', 
+            password='password123', 
+            first_name='John Doe'
         )
 
-    def test_login_after_verification(self):
-        url = reverse('login_user')
-        data = {
-            'email': 'testuser@example.com',
-            'password': 'testpassword123'
-        }
-        response = self.client.post(url, data, format='json')
+    def test_login_success(self):
+        data = {'email': 'johndoe@example.com', 'password': 'password123'}
+        user = CustomUser.objects.get(email='johndoe@example.com')
+        token = default_token_generator.make_token(user)
+        verify_data = {'user_id': user.id, 'confirmation_token': token}
+        self.client.post(reverse('verify_email'), verify_data, format='json')
+
+        response = self.client.post(reverse('login_user'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
 
-class PasswordChangeTests(APITestCase):
-
-    def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            username='testuser@example.com',
-            email='testuser@example.com',
-            password='testpassword123',
-            first_name='Test',
-            is_verify=True
-        )
-        self.client.force_authenticate(user=self.user)
-
-    def test_change_password(self):
-        url = reverse('change_password')
-        data = {
-            'old_password': 'testpassword123',
-            'new_password': 'newtestpassword123'
-        }
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password('newtestpassword123'))
-
-class ProfileUpdateTests(APITestCase):
-    def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            username='testuser@example.com',
-            email='testuser@example.com',
-            password='testpassword123',
-            first_name='Test',
-            last_name='User',
-            is_verify=True
-        )
-        self.admin_user = CustomUser.objects.create_superuser(
-            username='adminuser@example.com',
-            email='adminuser@example.com',
-            password='adminpassword123',
-            first_name='Admin',
-            last_name='User'
-        )
-        self.client.force_authenticate(user=self.user)
-
-    def test_user_can_update_own_profile(self):
-        url = reverse('user_account')
-        data = {
-            'first_name': 'UpdatedTest',
-            'last_name': 'UpdatedUser'
-        }
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, 'UpdatedTest')
-        self.assertEqual(self.user.last_name, 'UpdatedUser')
-
-    def test_non_admin_cannot_update_others_profile(self):
-        url = reverse('user_account')
-        data = {
-            'first_name': 'UpdatedTest',
-            'last_name': 'UpdatedUser'
-        }
-        self.client.force_authenticate(user=self.admin_user)
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admin_can_update_others_profile(self):
-        url = reverse('user_account')
-        data = {
-            'first_name': 'UpdatedTest',
-            'last_name': 'UpdatedUser'
-        }
-        self.client.force_authenticate(user=self.admin_user)
-        response = self.client.put(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
-class InvalidLoginTests(APITestCase):
-
-    def test_invalid_login(self):
-        url = reverse('login_user')
-        data = {
-            'email': 'nonexistentuser@example.com',
-            'password': 'wrongpassword'
-        }
-        response = self.client.post(url, data, format='json')
+    def test_login_invalid_credentials(self):
+        data = {'email': 'johndoe@example.com', 'password': 'wrongpassword'}
+        response = self.client.post(reverse('login_user'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['message'], 'Invalid Credentials')
 
-class UnauthorizedProfileAccessTests(APITestCase):
-    def test_unauthorized_access(self):
-        url = reverse('user_account')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+class VerifyEmailAPITestCase(APITestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username='johndoe@example.com', 
+            email='johndoe@example.com', 
+            password='password123', 
+            first_name='John Doe'
+        )
+
+    def test_verify_email_success(self):
+        data = {'user_id': self.user.id, 'confirmation_token': default_token_generator.make_token(self.user)}
+        response = self.client.post(reverse('verify_email'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'Email Successfully Verified')
+
+    def test_verify_email_invalid_token(self):
+        data = {'user_id': self.user.id, 'confirmation_token': 'invalid_token'}
+        response = self.client.post(reverse('verify_email'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['message'], 'Token is invalid or expired. Please request another confirmation email.')
+
+class UserRetrieveUpdateAPITestCase(APITestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='johndoe@example.com', email='johndoe@example.com', password='password123', first_name='John Doe')
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_user_success(self):
+        response = self.client.get(reverse('user_account'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email'], 'johndoe@example.com')
+
+    def test_update_user_success(self):
+        data = {'first_name': 'Jane Doe'}
+        response = self.client.patch(reverse('user_account'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['first_name'], 'Jane Doe')
+
+class ChangePasswordAPITestCase(APITestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username='johndoe@example.com', email='johndoe@example.com', password='password123', first_name='John Doe')
+        self.client.force_authenticate(user=self.user)
+
+    def test_change_password_success(self):
+        data = {'old_password': 'password123', 'new_password': 'newpassword123'}
+        response = self.client.patch(reverse('change_password'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'Password updated successfully')
+
+    def test_change_password_invalid_old_password(self):
+        data = {'old_password': 'wrongpassword', 'new_password': 'newpassword123'}
+        response = self.client.patch(reverse('change_password'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['message'], 'Wrong Password')

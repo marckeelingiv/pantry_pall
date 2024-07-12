@@ -28,7 +28,7 @@ class RegisterAPIView(generics.CreateAPIView):
         password = serializer.data.get('password')
 
         if CustomUser.objects.filter(Q(username__iexact=email) | Q(email__iexact=email)).exists():
-            return Response({'message': 'Email Already Exist'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = CustomUser.objects.create_user(username=email, email=email, password=password, first_name=first_name)
         confirmation_token = default_token_generator.make_token(user)
